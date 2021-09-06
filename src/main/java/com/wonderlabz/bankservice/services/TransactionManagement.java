@@ -55,15 +55,22 @@ public class TransactionManagement {
 
 
 
-    public void withdrawFromSavings(WithdrawlDto withdrawlDto) {
+    /*
+     * Method to withdraw money from either the current account or the savings account
+     * @Param withdrawlDto of tye WithdrawlDto
+     * returns void
+     */
+    public void withdrawMoney(WithdrawlDto withdrawlDto) {
 
         log.info("information on withdrawal amount");
         BigDecimalConverter bigDecimalConverter = new BigDecimalConverter();
         String accounttype = withdrawlDto.getAccountType();
+        String AccountTypeOne = AccounTypes.CURRENTACCOUNT.toString();
+        String AccountTypeTwo = AccounTypes.SAVINGSACCOUNT.toString();
         String email = withdrawlDto.getEmail();
         BigDecimal amountToWithdraw = bigDecimalConverter.changeStringToBigDecimal(withdrawlDto.getAmountToWithdraw());
         Users user = usersRepository.getById(email);
-        if (accounttype.equals(AccounTypes.SAVINGSACCOUNT)) {
+        if (accounttype.equals(AccountTypeTwo)) {
             SavingsAccount savingsAccount = user.getSavingsAccount();
             BigDecimal currentBalance = savingsAccount.getCurrentBalance();
             BigDecimal availableBalance = currentBalance.subtract(amountToWithdraw);
@@ -80,7 +87,7 @@ public class TransactionManagement {
 
                 log.info("insufficient funds");
             }
-        } else if (accounttype.equals(AccounTypes.CURRENTACCOUNT)) {
+        } else if (accounttype.equals(AccountTypeOne)) {
             CurrentAccount currentAccount = user.getCurrentAccount();
             BigDecimal currentBalance = currentAccount.getCurrentBalance();
             if (currentBalance.subtract(amountToWithdraw).compareTo(BigDecimal.ZERO) == 1) {
@@ -108,14 +115,21 @@ public class TransactionManagement {
     }
 
 
+    /*
+    * Method to deposit money into either the current account or the savings account
+    * @Param depositMoneyDto of tyep DepositMoneyDto
+    * returns void
+    */
     public void depositMoney(DepositMoneyDto depositMoneyDto) {
         log.info("received data to deposit money for : "+depositMoneyDto.getEmail());
         BigDecimalConverter bigDecimalConverter = new BigDecimalConverter();
         String accounttype = depositMoneyDto.getAccountType();
+        String AccountTypeOne = AccounTypes.CURRENTACCOUNT.toString();
+        String AccountTypeTwo = AccounTypes.SAVINGSACCOUNT.toString();
         String email = depositMoneyDto.getEmail();
         BigDecimal amountToDeposit = bigDecimalConverter.changeStringToBigDecimal(depositMoneyDto.getAmountToDeposit());
-        Users user = usersRepository.getById(email);
-        if (accounttype.equals(AccounTypes.CURRENTACCOUNT)) {
+        Users user = usersRepository.getByEmail(email);
+        if (accounttype.equals(AccountTypeOne)) {
             CurrentAccount currentAccount = user.getCurrentAccount();
             BigDecimal currentBalance = currentAccount.getCurrentBalance();
             BigDecimal avaliableBalance = currentBalance.add(amountToDeposit);
@@ -128,7 +142,7 @@ public class TransactionManagement {
             setTransactionDetails(email, AccounTypes.valueOf(accounttype), currentBalance, amountToDeposit, withdraw, avaliableBalance);
 
 
-        } else if (accounttype.equals(AccounTypes.SAVINGSACCOUNT)) {
+        } else if (accounttype.equals(AccountTypeTwo)) {
             SavingsAccount savingsAccount = user.getSavingsAccount();
             BigDecimal currentBalance = savingsAccount.getCurrentBalance();
             BigDecimal avaliableBalance = currentBalance.add(amountToDeposit);
@@ -143,6 +157,11 @@ public class TransactionManagement {
     }
 
 
+    /*
+     * Method to list all account transactions
+     * @Param email of tye String
+     * returns ArrayList of Type Transactions
+     */
     public List<Transactions> getTransactionHistory(String email) {
         log.info("This is the received email to be used to retrieve {}", email);
         List<Transactions> retrievedList = transactionsRepository.findByEmail(email);
@@ -150,6 +169,11 @@ public class TransactionManagement {
         return retrievedList;
     }
 
+    /*
+     * Method to withdraw money from either the current account or the savings account
+     * @Param email, @Param AccountTypes accounttype, @Param BigDecimal currentBalance, @Param BigDecimal depositAmount, @Param BigDecimal amountToWithdraw, @Param BigDecimal afterBalance
+     * returns Object of type Transactions
+     */
     public Transactions setTransactionDetails(String email, AccounTypes accounttype, BigDecimal currentBalance, BigDecimal depositAmount, BigDecimal amountToWithdraw, BigDecimal afterBalance) {
         Transactions transactions = new Transactions();
         transactions.setEmail(email);
@@ -160,7 +184,6 @@ public class TransactionManagement {
         transactions.setWithdrawal(amountToWithdraw);
         transactions.setBalance(afterBalance);
         return transactionsRepository.save(transactions);
-
 
     }
 }

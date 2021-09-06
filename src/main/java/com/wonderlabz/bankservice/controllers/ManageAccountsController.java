@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @Slf4j
-@RequestMapping("/api/v1")
 @CrossOrigin(origins = "*")
 public class ManageAccountsController {
 
@@ -21,6 +20,7 @@ public class ManageAccountsController {
     @PostMapping("/createaccount")
     public ResponseEntity createAccount(@RequestBody @Validated CreateUserDto createUserDto){
         log.info("Now processing account creation for ", createUserDto);
+        userAccountManagement.createNewUser(createUserDto);
         return new ResponseEntity<>("Your account has been successfully created", HttpStatus.OK);
     }
 

@@ -4,9 +4,11 @@ import com.wonderlabz.bankservice.dto.CreateUserDto;
 import com.wonderlabz.bankservice.entities.CurrentAccount;
 import com.wonderlabz.bankservice.entities.SavingsAccount;
 import com.wonderlabz.bankservice.entities.Users;
+import com.wonderlabz.bankservice.repositories.UsersRepository;
 import com.wonderlabz.bankservice.util.BigDecimalConverter;
 import com.wonderlabz.bankservice.util.GenerateAccountNumber;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +33,9 @@ public class UserAccountManagement {
     @Value("${bank.withdraw}")
     private BigDecimal withdraw;
 
+    @Autowired
+    UsersRepository usersRepository;
+
     Users users = new Users();
     CurrentAccount currentAccount = new CurrentAccount();
     SavingsAccount savingsAccount = new SavingsAccount();
@@ -47,7 +52,7 @@ public class UserAccountManagement {
         BigDecimal clientDepositAmount = bigDecimalConverter.changeStringToBigDecimal(createUserDto.getSavingsAccountDepositAmount());
         GenerateAccountNumber generateAccountNumber = new GenerateAccountNumber();
         DateTimeFormatter df = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-        LocalDateTime dateofBirth = LocalDateTime.parse(createUserDto.getDob(), df);
+        LocalDate dateofBirth = LocalDate.parse(createUserDto.getDob(), df);
         if(clientDepositAmount.compareTo(minimumDeposit)==1||clientDepositAmount.compareTo(minimumDeposit)==0){
             savingsAccount.setSavingsAccountNumber(generateAccountNumber.generateSecureAcccountNumber());
             savingsAccount.setCurrentBalance(clientDepositAmount);
@@ -72,6 +77,7 @@ public class UserAccountManagement {
             users.setCurrentAccount(currentAccount);
             users.setSavingsAccount(savingsAccount);
             log.info("About to save new user {}", users.toString());
+            usersRepository.save(users);
         }else{
             createUserDefinition = 0;
         }

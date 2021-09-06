@@ -26,7 +26,7 @@ public class ProcessTransactionsController {
     @PostMapping("/makewithdrawal")
     public ResponseEntity makeWithDrawal(@RequestBody @Validated WithdrawlDto withdrawlDto){
         log.info("now depositing money for the user : "+withdrawlDto.getEmail());
-        transactionManagement.withdrawFromSavings(withdrawlDto);
+        transactionManagement.withdrawMoney(withdrawlDto);
         return new ResponseEntity<>("Your successfully deposited", HttpStatus.OK);
     }
 
